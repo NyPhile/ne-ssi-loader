@@ -1,0 +1,20 @@
+{
+  "name": "ne-ssi-loader",
+  "version": "0.0.1",
+  "description": "Webpack SSI loader for netease",
+  "main": "index.js",
+  "scripts": {
+    "test": "-"
+  },
+  "keywords": [
+    "ssi",
+    "webpack",
+    "netease"
+  ],
+  "author": "wz102223205@sina.com",
+  "license": "ISC",
+  "dependencies": {
+    "iconv-lite": "^0.5.0",
+    "loader-utils": "^1.2.3"
+  }
+}
