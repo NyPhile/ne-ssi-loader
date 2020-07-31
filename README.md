@@ -1,6 +1,6 @@
 # ne-ssi-loader
 
-Webpack SSI loader for NETEASE
+🏈Webpack SSI loader for NETEASE
 
 一个简单的Webpack SSI loader，在cms项目中使用。比其他ssi-loader相比，可以设置远程include的charset设置。
 
@@ -21,8 +21,6 @@ Webpack SSI loader for NETEASE
 
 ## 设置
 
-请在dev模式中使用！
-
 ```js
 // webpack.dev.config.js
 
@@ -42,7 +40,8 @@ module: {
           },
           local: {
             charset: ''
-          }
+          },
+          build: 'src' // 是否替换资源。'src'只替换本地SSI，适合production模式，'build'只替换远程SSI。默认全部替换，适合dev模式。
         }
       }
     ]

@@ -7,6 +7,7 @@ const iconv = require('iconv-lite')
 let includeBase = ''
 let remoteCharset = ''
 let localCharset = ''
+let build = '' // 替换模式， 'src' 'remote' 'all'
 
 function getMatches(source) {
   let reg = /<!--\s*#\s?include\s+(?:virtual|file)="([^"]+)"(?:\s+stub="(\w+)")?\s*-->/gi
@@ -25,6 +26,14 @@ function getRemoteFile(match, context) {
   return new Promise((resolve, reject) => {
     let url
     if (path.isAbsolute(match.location)) {
+      if (build === 'src') {
+        // 不替换远程文件
+        return {
+          part: match.part,
+          content: match.part,
+          statusCode: 200
+        }
+      }
       let param = {
         url: `${includeBase}${match.location}`
       }
@@ -41,6 +50,14 @@ function getRemoteFile(match, context) {
         })
       })
     } else {
+      if (build === 'remote') {
+        // 不替换本地文件
+        return {
+          part: match.part,
+          content: match.part,
+          statusCode: 200
+        }
+      }
       if (match.location.indexOf('@' === 0)) {
         url = path.join(context._compiler.context, match.location.slice(1))
       } else {
@@ -71,6 +88,10 @@ module.exports = function(source) {
   if (options.remote) {
     includeBase = options.remote.locations
     remoteCharset = options.remote.charset
+  }
+
+  if (options.build) {
+    build = options.build
   }
 
   if (options.local) {
