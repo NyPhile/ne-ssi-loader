@@ -28,11 +28,11 @@ function getRemoteFile(match, context) {
     if (path.isAbsolute(match.location)) {
       if (build === 'src') {
         // 不替换远程文件
-        return {
+        return resolve({
           part: match.part,
           content: match.part,
           statusCode: 200
-        }
+        })
       }
       let param = {
         url: `${includeBase}${match.location}`
@@ -52,11 +52,11 @@ function getRemoteFile(match, context) {
     } else {
       if (build === 'remote') {
         // 不替换本地文件
-        return {
+        return resolve({
           part: match.part,
           content: match.part,
           statusCode: 200
-        }
+        })
       }
       if (match.location.indexOf('@' === 0)) {
         url = path.join(context._compiler.context, match.location.slice(1))
