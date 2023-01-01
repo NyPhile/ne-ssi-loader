@@ -20,6 +20,6 @@
   "license": "WTFPL",
   "dependencies": {
     "iconv-lite": "^0.5.0",
-    "loader-utils": "^1.2.3"
+    "loader-utils": "^3.2.1"
   }
 }
