@@ -1,6 +1,6 @@
 {
   "name": "ne-ssi-loader",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Webpack SSI loader for netease",
   "main": "index.js",
   "scripts": {
@@ -14,7 +14,7 @@
   "author": "wz102223205@sina.com",
   "repository": {
     "type": "github",
-    "url": "https://github.com/NyPhile/ne-ssi-loader.git"
+    "url": "git+https://github.com/NyPhile/ne-ssi-loader.git"
   },
   "homepage": "https://github.com/NyPhile/ne-ssi-loader",
   "license": "WTFPL",
