@@ -36,10 +36,10 @@ function getRemoteFile(match, context) {
           statusCode: 200
         })
       }
-      
+
       // 构建缓存键
       const cacheKey = `${includeBase}${match.location}`
-      
+
       // 检查缓存中是否有有效内容
       if (contentCache[cacheKey]) {
         console.log(`使用缓存内容: ${cacheKey}`)
@@ -49,27 +49,26 @@ function getRemoteFile(match, context) {
           statusCode: 200
         })
       }
-      
+
       let param = {
         url: `${includeBase}${match.location}`,
         headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'Accept-Encoding': 'identity',
+          'encoding': null
         }
-      }
-      if (remoteCharset) {
-        param.encoding = null
       }
       request(param, (err, response, body) => {
         if (err) {
           console.log(err.message || "请求出错")
           return reject(err)
         }
-        let content = remoteCharset ? iconv.decode(body, remoteCharset).toString() : body
-        
+        let content = remoteCharset ? iconv.decode(body, remoteCharset).toString() : body.toString()
+
         // 检测内容中是否包含乱码字符"�"，如果有则重新请求（最多重试3次）
         let retryCount = 0;
         const maxRetries = 3;
-        
+
         function tryRequest() {
           if (content.includes('�') && retryCount < maxRetries) {
             console.log(`检测到乱码字符，正在重新请求 (${retryCount + 1}/${maxRetries})...`);
@@ -92,7 +91,7 @@ function getRemoteFile(match, context) {
               contentCache[cacheKey] = content
               console.log(`缓存内容: ${cacheKey}`)
             }
-            
+
             return resolve({
               part: match.part,
               content,
@@ -100,7 +99,7 @@ function getRemoteFile(match, context) {
             });
           }
         }
-        
+
         tryRequest();
       })
     } else {
@@ -135,7 +134,7 @@ function getRemoteFile(match, context) {
   })
 }
 
-module.exports = function(source) {
+module.exports = function (source) {
   let callback = this.async()
   const options = loaderUtils.getOptions(this)
 

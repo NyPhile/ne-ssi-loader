@@ -1,6 +1,6 @@
 {
   "name": "ne-ssi-loader",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "description": "Webpack SSI loader for netease",
   "main": "index.js",
   "scripts": {
