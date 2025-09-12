@@ -8,6 +8,8 @@ let includeBase = ''
 let remoteCharset = ''
 let localCharset = ''
 let build = '' // 替换模式， 'src' 'remote' 'all'
+// 添加缓存对象
+const contentCache = {}
 
 function getMatches(source) {
   let reg = /<!--\s*#\s?include\s+(?:virtual|file)="([^"]+)"(?:\s+stub="(\w+)")?\s*-->/gi
@@ -34,20 +36,71 @@ function getRemoteFile(match, context) {
           statusCode: 200
         })
       }
-      let param = {
-        url: `${includeBase}${match.location}`
-      }
-      if (remoteCharset) {
-        param.encoding = null
-      }
-      request(param, (err, response, body) => {
-        if (err) return reject(err)
-        let content = remoteCharset ? iconv.decode(body, remoteCharset).toString() : body
+
+      // 构建缓存键
+      const cacheKey = `${includeBase}${match.location}`
+
+      // 检查缓存中是否有有效内容
+      if (contentCache[cacheKey]) {
+        console.log(`使用缓存内容: ${cacheKey}`)
         return resolve({
           part: match.part,
-          content,
-          statusCode: response.statusCode
+          content: contentCache[cacheKey],
+          statusCode: 200
         })
+      }
+
+      let param = {
+        url: `${includeBase}${match.location}`,
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+          'Accept-Encoding': 'identity',
+          'encoding': null
+        }
+      }
+      request(param, (err, response, body) => {
+        if (err) {
+          console.log(err.message || "请求出错")
+          return reject(err)
+        }
+        let content = remoteCharset ? iconv.decode(body, remoteCharset).toString() : body.toString()
+
+        // 检测内容中是否包含乱码字符"�"，如果有则重新请求（最多重试3次）
+        let retryCount = 0;
+        const maxRetries = 3;
+
+        function tryRequest() {
+          if (content.includes('�') && retryCount < maxRetries) {
+            console.log(`检测到乱码字符，正在重新请求 (${retryCount + 1}/${maxRetries})...`);
+            retryCount++;
+            request(param, (retryErr, retryResponse, retryBody) => {
+              if (retryErr) {
+                console.log(retryErr.message || "重试请求出错");
+                return resolve({
+                  part: match.part,
+                  content,
+                  statusCode: response.statusCode
+                });
+              }
+              content = remoteCharset ? iconv.decode(retryBody, remoteCharset).toString() : retryBody;
+              tryRequest(); // 递归检查结果
+            });
+          } else {
+            // 如果内容没有乱码，则缓存它
+            if (!content.includes('�')) {
+              contentCache[cacheKey] = content
+              console.log(`缓存内容: ${cacheKey}`)
+            }
+
+            return resolve({
+              part: match.part,
+              content,
+              statusCode: response.statusCode
+            });
+          }
+        }
+
+        tryRequest();
       })
     } else {
       if (build === 'remote') {
@@ -81,7 +134,7 @@ function getRemoteFile(match, context) {
   })
 }
 
-module.exports = function(source) {
+module.exports = function (source) {
   let callback = this.async()
   const options = loaderUtils.getOptions(this)
 
